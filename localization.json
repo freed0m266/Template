@@ -1,0 +1,10 @@
+{
+    "apiKey": "",
+    "destinationDir": "TemplateResources/Resources",
+    "keyColumnName": "ios_key",
+    "languageMapping": {
+        "EN": "en",
+        "CZ": "cs"
+    },
+    "spreadsheetID": ""
+}

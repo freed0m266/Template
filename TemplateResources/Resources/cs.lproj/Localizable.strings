@@ -1,0 +1,9 @@
+"general.cancel" = "Zrušit";
+"general.error" = "Chyba";
+"general.yes" = "Ano";
+"general.no" = "Ne";
+"general.ok" = "OK";
+"general.notAvailable" = "N/A";
+"general.title" = "Template";
+"error.defaultTitle" = "Chyba";
+"error.defaultMessage" = "Došlo k neočekávané chybě. Zkuste to prosím později.";
