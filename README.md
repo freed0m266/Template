@@ -68,13 +68,17 @@ View → ViewModel → UseCase → Repository → Service (API)
 
 ## Adding a Feature
 
-1. Create `Features/{Name}/{Sources,Testing,Tests}/`
-2. Add `{Name}View.swift`, `{Name}ViewModel.swift`, `{Name}Dependencies.swift`
-3. Add `{Name}ViewModelMock.swift` under `Testing/`
-4. Add `{Name}Snapshots.swift` under `Tests/`
-5. Register the feature in `Tuist/ProjectDescriptionHelpers/Targets/Features/{Name}.swift`
-6. Add it to `features` in `Project.swift` and to the app's dependency list in `Targets/App.swift`
-7. Run `tuist generate`
+Use the feature generator script:
+
+```bash
+./new_feature.sh FeatureName
+```
+
+Then regenerate the project:
+
+```bash
+tuist generate
+```
 
 ## Dependencies
 
