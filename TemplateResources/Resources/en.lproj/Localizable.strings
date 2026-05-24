@@ -7,3 +7,4 @@
 "general.title" = "Template";
 "error.defaultTitle" = "Error";
 "error.defaultMessage" = "Unexpected error has occurred. Please try again later.";
+"example.welcomeText" = "Hello, World!";

@@ -8,16 +8,19 @@
 
 import SwiftUI
 import TemplateUI
+import TemplateResources
 
 public struct ExampleView<ViewModel: ExampleViewModeling>: View {
 	@State private var viewModel: ViewModel
+
+	typealias Texts = L10n.Example
 
 	init(viewModel: ViewModel) {
 		_viewModel = .init(wrappedValue: viewModel)
 	}
 
 	public var body: some View {
-		Text("Hello, World!")
+		Text(Texts.welcomeText)
 	}
 }
 
