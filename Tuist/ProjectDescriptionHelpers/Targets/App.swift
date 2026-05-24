@@ -24,7 +24,7 @@ public let app: Target = .target(
 	resources: ["\(targetName)/Resources/**"],
 	scripts: [
 		.swiftlint,
-		.setBundleVersion
+		.setVersions
 	],
 	dependencies: [
 		.target(core),

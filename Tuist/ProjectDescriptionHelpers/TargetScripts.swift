@@ -10,11 +10,12 @@ extension TargetScript {
 		)
 	}
 	
-	/// Set app versions to Info.plist
-	static var setBundleVersion: TargetScript {
+	/// Sets CFBundleShortVersionString and CFBundleVersion automatically from git.
+	/// Version: vX.Y.Z git tag, Build: CI build number or git commit count fallback.
+	public static var setVersions: TargetScript {
 		.post(
-			path: "BuildPhases/SetBundleVersion.sh",
-			name: "Set app versions",
+			path: "BuildPhases/SetVersions.sh",
+			name: "Set App Versions",
 			basedOnDependencyAnalysis: false
 		)
 	}
