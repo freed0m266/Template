@@ -108,5 +108,4 @@ tuist generate
 
 - [SwiftyBeaver](https://github.com/SwiftyBeaver/SwiftyBeaver) — Logging
 - [BaseKitX](https://github.com/freed0m266/BaseKitX) — Foundation utilities
-- [ACKategories](https://github.com/AckeeCZ/ACKategories) — Common helpers
 - [swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing) — Snapshot tests
