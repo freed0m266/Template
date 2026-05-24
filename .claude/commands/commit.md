@@ -1,1 +1,0 @@
-Suggest 3 commit messages for the current staged changes. Each message must be under 50 characters. No bullet points, just the 3 messages numbered.
