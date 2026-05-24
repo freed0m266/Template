@@ -42,12 +42,7 @@ let project = Project(
 				targets: ["Template"]
 			),
 			runAction: .runAction(
-				executable: .executable("Template"),
-				arguments: .arguments(
-					environmentVariables: [
-						"OS_ACTIVITY_MODE": "disable",
-					]
-				)
+				executable: .executable("Template")
 			),
 			archiveAction: .archiveAction(
 				configuration: "Release"
