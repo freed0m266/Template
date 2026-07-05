@@ -8,6 +8,8 @@
 
 import Foundation
 
+@Observable
+@MainActor
 final class ExampleViewModelMock: ExampleViewModeling {
-
+	func refreshData() async { }
 }

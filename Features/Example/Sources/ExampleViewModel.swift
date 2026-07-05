@@ -11,7 +11,7 @@ import TemplateCore
 
 @MainActor
 public protocol ExampleViewModeling: Observable {
-
+	func refreshData() async
 }
 
 @MainActor
@@ -29,5 +29,17 @@ final class ExampleViewModel: BaseViewModel, ExampleViewModeling {
 	init(dependencies: ExampleDependencies) {
 		self.dependencies = dependencies
 		super.init()
+	}
+
+	// MARK: - Public API
+
+	func refreshData() async {
+
+	}
+
+	// MARK: - Private API
+
+	private func setupBindings() {
+
 	}
 }
