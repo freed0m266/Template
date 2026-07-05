@@ -1,10 +1,10 @@
+"error.defaultMessage" = "Unexpected error has occurred. Please try again later.";
+"error.defaultTitle" = "Error";
+"example.welcomeText" = "Hello, World!";
 "general.cancel" = "Cancel";
 "general.error" = "Error";
-"general.yes" = "Yes";
 "general.no" = "No";
-"general.ok" = "OK";
 "general.notAvailable" = "N/A";
+"general.ok" = "OK";
 "general.title" = "Template";
-"error.defaultTitle" = "Error";
-"error.defaultMessage" = "Unexpected error has occurred. Please try again later.";
-"example.welcomeText" = "Hello, World!";
+"general.yes" = "Yes";
