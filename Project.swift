@@ -6,6 +6,8 @@ let features: [Feature] = [
 ]
 let appTargets: [Target] = features.flatMap(\.allTargets)
 
+let setup = AppSetup.current
+
 let project = Project(
 	name: "Template",
 	organizationName: "Freedom Martin, s.r.o.",
@@ -16,16 +18,11 @@ let project = Project(
 		base: [
 			"SWIFT_VERSION": "6.0",
 			"IPHONEOS_DEPLOYMENT_TARGET": "26.0",
-			"TARGETED_DEVICE_FAMILY": "1",
-			"DEVELOPMENT_TEAM": "", // Set Team ID when starting a new project.
-			"CODE_SIGN_STYLE": "Automatic",
-			"DEBUG_INFORMATION_FORMAT": "dwarf-with-dsym",
-			"CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION": "YES"
+			"TARGETED_DEVICE_FAMILY": "1"
 		],
-		configurations: [
-			.debug(name: "Debug"),
-			.release(name: "Release"),
-		]
+		// Signing (`DEVELOPMENT_TEAM`, `CODE_SIGN_STYLE`, …) and the environment's Swift
+		// compilation conditions live in `AppSetup.projectConfigurations` — see ADR 0001.
+		configurations: setup.projectConfigurations
 	),
 	targets: [
 		app,

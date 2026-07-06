@@ -1,16 +1,20 @@
 import ProjectDescription
 
-let appBundleId = "com.freedommartin.template"
-
 private let targetName = "Template"
+private let setup = AppSetup.current
+
+/// Reverse-DNS prefix for framework and test target bundle IDs. Environment-agnostic on purpose:
+/// embedded frameworks don't install separately, so they keep a stable ID across TEST/PROD. Only the
+/// app target takes the `.test` suffix (see `AppSetup`), via `setup.bundleID`.
+let appBundleId = setup.moduleBundleIDPrefix
 
 public let app: Target = .target(
 	name: targetName,
 	destinations: [.iPhone],
 	product: .app,
-	bundleId: appBundleId,
+	bundleId: setup.bundleID,
 	infoPlist: .extendingDefault(with: [
-		"CFBundleDisplayName": .string(targetName),
+		"CFBundleDisplayName": .string(setup.appName),
 		"UILaunchScreen": [
 			"UIColorName": "BackgroundColor",
 		],
@@ -34,7 +38,7 @@ public let app: Target = .target(
 	],
 	settings: .settings(
 		base: [
-			"ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
+			"ASSETCATALOG_COMPILER_APPICON_NAME": .string(setup.appIconName),
 		]
 	)
 )
