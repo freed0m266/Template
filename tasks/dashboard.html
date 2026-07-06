@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Template tasks</title>
+  <style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { background: #0a0a0a; margin: 0; }
+body {
+  color: #e5e5e5;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.num, .progress-label, footer.done { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+
+header.site {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #0a0a0a;
+  border-bottom: 1px solid #222;
+  padding: 16px 20px;
+}
+header.site h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+.stats { color: #888; font-size: 13px; }
+.stats .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+
+.progress-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px 20px;
+  margin: 12px 0 4px;
+}
+.progress-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.progress-track {
+  flex: 1;
+  min-width: 80px;
+  height: 6px;
+  background: #1c1c1c;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-fill { height: 100%; border-radius: 999px; }
+.progress-label {
+  font-size: 12px;
+  color: #888;
+  white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.controls { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+input[type="search"] {
+  width: 100%;
+  background: #141414;
+  border: 1px solid #222;
+  border-radius: 8px;
+  color: #e5e5e5;
+  font-size: 14px;
+  padding: 8px 12px;
+}
+input[type="search"]::placeholder { color: #555; }
+input[type="search"]:focus { outline: none; border-color: #3a3a3a; }
+
+.filter-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.filter-chips button {
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 3px 10px;
+  border: 1px solid #333;
+  background: transparent;
+  color: #aaa;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.filter-chips button:hover { border-color: #444; }
+.filter-chips button.active { background: #333; color: #fff; border-color: #333; }
+
+main.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 20px;
+  align-items: start;
+}
+@media (max-width: 900px) { main.board { grid-template-columns: 1fr; } }
+
+.column { border-top: 2px solid #555; padding-top: 12px; }
+.column[data-status="todo"] { border-top-color: #5b9bd5; }
+.column[data-status="done"] { border-top-color: #6abf69; }
+.column[data-status="canceled"] { border-top-color: #6a4a4a; }
+.column[data-status="canceled"] .card { opacity: 0.6; }
+.column.drag-over { outline: 1px dashed #444; outline-offset: 6px; border-radius: 8px; background: #101010; }
+.column h2 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #aaa;
+}
+.column h2 .count {
+  color: #555;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  margin-left: 4px;
+}
+
+.card {
+  background: #141414;
+  border: 1px solid #222;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+.card:hover { border-color: #333; }
+.card[hidden] { display: none; }
+.card.dragging { opacity: 0.4; }
+.card > header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+.card .num { color: #555; font-size: 12px; }
+.card h3 { margin: 0; font-size: 14px; font-weight: 600; }
+
+.badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.badge {
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.badge.priority, .badge.effort { border: 1px solid #333; color: #aaa; }
+.badge.impact-blocking { background: #5a1f1f; color: #ffb4b4; }
+.badge.impact-high { background: #5a3a1f; color: #ffd4a8; }
+.badge.impact-medium { background: #4a4a1f; color: #f0e0a0; }
+.badge.impact-low,
+.badge.impact-none { background: #2a2a2a; color: #888; }
+
+.card .summary { margin: 0; color: #bbb; font-size: 13px; }
+.card footer.done { margin-top: 10px; color: #6abf69; font-size: 11px; }
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 20px;
+}
+.modal-backdrop[hidden] { display: none; }
+.modal {
+  background: #141414;
+  border: 1px solid #222;
+  border-radius: 12px;
+  max-width: 760px;
+  width: 100%;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  padding: 20px 28px 28px;
+}
+.modal-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  background: #1e1e1e;
+  color: #888;
+  border: 1px solid #333;
+  border-radius: 8px;
+}
+.modal-close:hover { color: #fff; border-color: #444; }
+
+.md { font-size: 14px; }
+.md h1 { font-size: 20px; margin: 4px 0 12px; }
+.md h2 { font-size: 16px; margin: 20px 0 8px; border-bottom: 1px solid #222; padding-bottom: 4px; }
+.md h3 { font-size: 14px; margin: 16px 0 6px; }
+.md h4, .md h5, .md h6 { font-size: 13px; margin: 12px 0 6px; color: #ccc; }
+.md p, .md li { color: #bbb; }
+.md li { margin: 3px 0; }
+.md a { color: #5b9bd5; }
+.md code {
+  background: #1e1e1e;
+  border: 1px solid #2a2a2a;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 12px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+.md pre {
+  background: #0f0f0f;
+  border: 1px solid #222;
+  border-radius: 8px;
+  padding: 12px;
+  overflow-x: auto;
+}
+.md pre code { background: none; border: none; padding: 0; font-size: 12px; display: block; }
+.md blockquote { border-left: 3px solid #333; margin: 8px 0; padding: 2px 12px; color: #999; }
+.md table { border-collapse: collapse; margin: 10px 0; font-size: 13px; display: block; overflow-x: auto; }
+.md th, .md td { border: 1px solid #2a2a2a; padding: 5px 10px; text-align: left; color: #bbb; }
+.md th { color: #ddd; background: #181818; }
+.md hr { border: none; border-top: 1px solid #222; margin: 16px 0; }
+
+.toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 200;
+  background: #5a1f1f;
+  color: #ffb4b4;
+  border: 1px solid #7a2f2f;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  max-width: 360px;
+}
+  </style>
+</head>
+<body>
+  <header class="site">
+    <h1>Template tasks</h1>
+    <div class="stats">
+      <span class="mono">1</span> total ·
+      <span class="mono" id="stat-done">0</span> done ·
+      <span class="mono" id="stat-todo">1</span> todo ·
+      <span class="mono" id="stat-canceled">0</span> canceled
+    </div>
+    <div class="progress-grid">
+        <div class="progress-row" data-bucket="v1.0">
+          <div class="progress-track"><div class="progress-fill" style="width:0%;background:#6abf69"></div></div>
+          <span class="progress-label" title="v1.0 — 0/1 (0%)">v1.0 — 0/1 (0%)</span>
+        </div>
+    </div>
+    <div class="controls">
+      <input type="search" id="search" placeholder="Search title or summary…" autocomplete="off">
+      <div class="filter-chips">
+        <button data-filter="all" class="active">All</button>
+        <button data-filter="v1.0" title="v1.0">v1.0</button>
+      </div>
+    </div>
+  </header>
+  <main class="board">
+      <section class="column" data-status="todo">
+        <h2>Todo <span class="count">1</span></h2>
+        <article class="card" data-number="1" data-priority="v1.0" data-impact="low" data-search="example task tento soubor je příklad / template pro budoucí task. smaž ho nebo přepiš, jakmile budeš psát první reálný task. reálný task má konkrétní user-visible feature s jasným „hotovo…">
+          <header>
+            <span class="num">#01</span>
+            <h3>Example task</h3>
+          </header>
+          <div class="badges">
+            <span class="badge priority" title="v1.0">v1.0</span>
+            <span class="badge effort">S</span>
+            <span class="badge impact impact-low">Low</span>
+          </div>
+          <p class="summary">Tento soubor je příklad / template pro budoucí task. Smaž ho nebo přepiš, jakmile budeš psát první reálný task. Reálný task má konkrétní user-visible feature s jasným „hotovo…</p>
+          <div class="md-source" hidden># 01 — Example task
+
+**Status:** Todo
+
+**Priorita:** v1.0 · **Úsilí:** S · **Dopad:** Low (example)
+
+## Cíl
+
+Tento soubor je příklad / template pro budoucí task. Smaž ho nebo přepiš, jakmile budeš psát první reálný task. Reálný task má konkrétní user-visible feature s jasným „hotovo když" kritériem a buildovatelným artefaktem.
+
+## Kontext
+
+- Struktura task souboru je popsaná v [`tasks/README.md`](README.md).
+- Claude command `/task &lt;číslo&gt;` použije tento soubor jako vstup, založí feature branch, implementuje, spustí Codex review na staged diff a označí task jako Done.
+- Po dokončení Claude přidá `**Status:** Done — YYYY-MM-DD` na začátek souboru.
+- Konvence repozitáře (MVVM, protocol-first, `@Observable`, DI přes `AppDependency`, mocky v `Testing/`, snapshot testy přes `AssertSnapshot`) jsou popsané v `CLAUDE.md`.
+
+## Scope
+
+### 1. Konkrétní akční bod
+
+Každá sub-section by měla být buildable krok — soubor, který se vytvoří, funkce, která se přidá, test, který se napíše.
+
+### 2. Testy
+
+Vyjmenuj konkrétní testy. Unit (Core-style) nebo snapshot (UI-style). Co se assertuje, jaké edge cases.
+
+### 3. Lokalizace
+
+Pokud feature vkládá uživatelsky-viditelné texty: přidej klíče do `TemplateResources/Resources/en.lproj/Localizable.strings` ve formátu `&lt;feature&gt;.&lt;section&gt;.&lt;key&gt;`. Texty se používají přes typed `L10n.&lt;Feature&gt;.&lt;section&gt;.&lt;key&gt;` (Tuist generuje strukturu automaticky).
+
+## Mimo scope
+
+- Explicit-deny list. Co tento task vědomě **NE**dělá. Bez tohohle bodu „task creep" debaty pokračují donekonečna.
+
+## Hotovo když
+
+- Build prochází (`tuist generate &amp;&amp; xcodebuild ... build`).
+- Všechny testy green.
+- Snapshot testy refreshnuté pokud byla změna view layeru.
+- Manuální verify v simulátoru / na zařízení.
+
+## Rizika
+
+- Edge cases, fragile interactions, performance traps, iOS-version specifické chování.
+
+## Reference
+
+- `CLAUDE.md` — projektové konvence
+- `Features/Example/` — referenční implementace pro feature framework
+- Apple HIG / iOS API docs — pokud se feature dotýká platformy
+</div>
+        </article>
+      </section>
+      <section class="column" data-status="done">
+        <h2>Done <span class="count">0</span></h2>
+      </section>
+      <section class="column" data-status="canceled">
+        <h2>Canceled <span class="count">0</span></h2>
+      </section>
+  </main>
+  <div class="modal-backdrop" id="modal" hidden>
+    <div class="modal">
+      <button class="modal-close" id="modal-close" aria-label="Close" title="Close (Esc)">×</button>
+      <div class="md" id="modal-body"></div>
+    </div>
+  </div>
+  <div class="toast" id="toast" hidden></div>
+  <script>
+(function () {
+  var SERVE = false;
+  var search = document.getElementById("search");
+  var chips = Array.prototype.slice.call(document.querySelectorAll(".filter-chips button"));
+  var cards = Array.prototype.slice.call(document.querySelectorAll(".card"));
+  var columns = Array.prototype.slice.call(document.querySelectorAll(".column"));
+  var activeFilter = "all";
+
+  // --- search + priority filter -------------------------------------------
+
+  function apply() {
+    var q = search.value.trim().toLowerCase();
+    cards.forEach(function (card) {
+      var matchesSearch = !q || card.dataset.search.indexOf(q) !== -1;
+      var matchesFilter = activeFilter === "all" || card.dataset.priority === activeFilter;
+      card.hidden = !(matchesSearch && matchesFilter);
+    });
+    columns.forEach(function (col) {
+      var visible = col.querySelectorAll(".card:not([hidden])").length;
+      col.querySelector(".count").textContent = visible;
+    });
+  }
+
+  search.addEventListener("input", apply);
+  chips.forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      chips.forEach(function (c) { c.classList.remove("active"); });
+      chip.classList.add("active");
+      activeFilter = chip.dataset.filter;
+      apply();
+    });
+  });
+
+  // --- tiny markdown renderer (covers what the task files use) -------------
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  function inline(s) {
+    s = escapeHtml(s);
+    var codes = [];
+    s = s.replace(/`([^`]*)`/g, function (_, code) {
+      codes.push(code);
+      return "\u0000" + (codes.length - 1) + "\u0000";
+    });
+    s = s.replace(/&lt;(https?:\/\/[^\s&]+)&gt;/g,
+                  '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,
+                  '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    s = s.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+    s = s.replace(/\u0000(\d+)\u0000/g, function (_, i) {
+      return "<code>" + codes[+i] + "</code>";
+    });
+    return s;
+  }
+
+  function renderMarkdown(src) {
+    var lines = src.split("\n");
+    var out = [];
+    var listStack = [];
+    var i = 0;
+
+    function closeLists() {
+      while (listStack.length) out.push("</" + listStack.pop().type + ">");
+    }
+    function splitRow(row) {
+      var s = row.trim();
+      if (s.charAt(0) === "|") s = s.slice(1);
+      if (s.charAt(s.length - 1) === "|") s = s.slice(0, -1);
+      return s.split("|").map(function (c) { return c.trim(); });
+    }
+
+    while (i < lines.length) {
+      var line = lines[i];
+
+      if (/^\s*```/.test(line)) {                      // fenced code block
+        closeLists();
+        var code = [];
+        i += 1;
+        while (i < lines.length && !/^\s*```/.test(lines[i])) {
+          code.push(lines[i]);
+          i += 1;
+        }
+        i += 1;
+        out.push("<pre><code>" + escapeHtml(code.join("\n")) + "</code></pre>");
+        continue;
+      }
+
+      var h = line.match(/^(#{1,6})\s+(.*)$/);          // heading
+      if (h) {
+        closeLists();
+        out.push("<h" + h[1].length + ">" + inline(h[2]) + "</h" + h[1].length + ">");
+        i += 1;
+        continue;
+      }
+
+      if (/^\s*---+\s*$/.test(line)) {                 // horizontal rule
+        closeLists();
+        out.push("<hr>");
+        i += 1;
+        continue;
+      }
+
+      if (/^\s*>/.test(line)) {                         // blockquote
+        closeLists();
+        var quote = [];
+        while (i < lines.length && /^\s*>/.test(lines[i])) {
+          quote.push(lines[i].replace(/^\s*>\s?/, ""));
+          i += 1;
+        }
+        out.push("<blockquote>" + quote.map(inline).join("<br>") + "</blockquote>");
+        continue;
+      }
+
+      if (/^\s*\|/.test(line) && i + 1 < lines.length &&  // table
+          /^\s*\|[\s|:-]*$/.test(lines[i + 1]) &&
+          lines[i + 1].indexOf("-") !== -1) {
+        closeLists();
+        var head = splitRow(line);
+        i += 2;
+        var rows = "<tr>" + head.map(function (c) {
+          return "<th>" + inline(c) + "</th>";
+        }).join("") + "</tr>";
+        while (i < lines.length && /^\s*\|/.test(lines[i])) {
+          rows += "<tr>" + splitRow(lines[i]).map(function (c) {
+            return "<td>" + inline(c) + "</td>";
+          }).join("") + "</tr>";
+          i += 1;
+        }
+        out.push("<table>" + rows + "</table>");
+        continue;
+      }
+
+      var li = line.match(/^(\s*)([-*+]|\d+\.)\s+(.*)$/);  // list item
+      if (li) {
+        var indent = li[1].length;
+        var type = /^\d/.test(li[2]) ? "ol" : "ul";
+        var text = li[3];
+        var cb = text.match(/^\[([ xX])\]\s*(.*)$/);
+        if (cb) text = (cb[1] === " " ? "\u2610 " : "\u2611 ") + cb[2];
+        while (listStack.length && indent < listStack[listStack.length - 1].indent) {
+          out.push("</" + listStack.pop().type + ">");
+        }
+        var top = listStack[listStack.length - 1];
+        if (!top || indent > top.indent) {
+          listStack.push({ type: type, indent: indent });
+          out.push("<" + type + ">");
+        } else if (top.type !== type) {
+          out.push("</" + listStack.pop().type + ">");
+          listStack.push({ type: type, indent: indent });
+          out.push("<" + type + ">");
+        }
+        out.push("<li>" + inline(text) + "</li>");
+        i += 1;
+        continue;
+      }
+
+      if (!line.trim()) {                                // blank line
+        closeLists();
+        i += 1;
+        continue;
+      }
+
+      closeLists();                                      // paragraph
+      var para = [line.trim()];
+      i += 1;
+      while (i < lines.length && lines[i].trim() &&
+             !/^(#{1,6}\s|\s*```|\s*>|\s*([-*+]|\d+\.)\s|\s*\|)/.test(lines[i])) {
+        para.push(lines[i].trim());
+        i += 1;
+      }
+      out.push("<p>" + inline(para.join(" ")) + "</p>");
+    }
+    closeLists();
+    return out.join("\n");
+  }
+
+  // --- task detail modal ----------------------------------------------------
+
+  var modal = document.getElementById("modal");
+  var modalBody = document.getElementById("modal-body");
+  var suppressClick = false;
+
+  function openModal(card) {
+    var src = card.querySelector(".md-source");
+    if (!src) return;
+    modalBody.innerHTML = renderMarkdown(src.textContent);
+    modal.hidden = false;
+    modal.querySelector(".modal").scrollTop = 0;
+  }
+  function closeModal() { modal.hidden = true; }
+
+  cards.forEach(function (card) {
+    card.addEventListener("click", function () {
+      if (suppressClick) return;
+      openModal(card);
+    });
+  });
+  modal.addEventListener("click", function (e) {
+    if (e.target === modal) closeModal();
+  });
+  document.getElementById("modal-close").addEventListener("click", closeModal);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !modal.hidden) closeModal();
+  });
+  // Cross-references to sibling task files open that task's modal in place.
+  modalBody.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest && e.target.closest("a");
+    if (!a) return;
+    var m = (a.getAttribute("href") || "").match(/^(\d+)-[^\/]*\.md$/);
+    if (!m) return;
+    var card = document.querySelector('.card[data-number="' + parseInt(m[1], 10) + '"]');
+    if (card) {
+      e.preventDefault();
+      openModal(card);
+    }
+  });
+
+  // --- counts / progress recompute (after a drag) ---------------------------
+
+  function recount() {
+    apply();
+    ["todo", "done", "canceled"].forEach(function (status) {
+      var el = document.getElementById("stat-" + status);
+      if (el) {
+        el.textContent = document.querySelectorAll(
+          '.column[data-status="' + status + '"] .card').length;
+      }
+    });
+    Array.prototype.slice.call(document.querySelectorAll(".progress-row")).forEach(function (row) {
+      var bucket = row.getAttribute("data-bucket");
+      var escaped = (window.CSS && CSS.escape) ? CSS.escape(bucket) : bucket;
+      var sel = '.card[data-priority="' + escaped + '"]';
+      var total = document.querySelectorAll(sel).length;
+      var done = document.querySelectorAll('.column[data-status="done"] ' + sel).length;
+      var canceled = document.querySelectorAll('.column[data-status="canceled"] ' + sel).length;
+      var denom = total - canceled;
+      var pct = denom ? Math.round(done / denom * 100) : 0;
+      row.querySelector(".progress-fill").style.width = pct + "%";
+      var label = bucket + " — " + done + "/" + denom + " (" + pct + "%)";
+      var labelEl = row.querySelector(".progress-label");
+      labelEl.textContent = label;
+      labelEl.title = label;
+    });
+  }
+
+  var toastTimer = null;
+  function showToast(message) {
+    var toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.hidden = true; }, 4000);
+  }
+
+  // --- drag-and-drop status change (needs --serve for the writeback) --------
+
+  function setDoneFooter(card, text) {
+    var footer = card.querySelector("footer.done");
+    if (!text) {
+      if (footer) footer.remove();
+      return;
+    }
+    if (!footer) {
+      footer = document.createElement("footer");
+      footer.className = "done";
+      card.appendChild(footer);
+    }
+    footer.textContent = text;
+  }
+
+  // Replay the server's status-line edit on the card's embedded markdown so
+  // the modal stays in sync with the file without a full reload.
+  function patchSource(card, data) {
+    if (!data.line || !data.mode) return;
+    var src = card.querySelector(".md-source");
+    if (!src) return;
+    var lines = src.textContent.split("\n");
+    for (var i = 0; i < lines.length; i += 1) {
+      if (/^\s*\*\*Status:\*\*/.test(lines[i])) {
+        if (data.mode === "replaced") lines[i] = data.line;
+        else lines.splice(i, 0, data.line, "");
+        src.textContent = lines.join("\n");
+        return;
+      }
+    }
+  }
+
+  function moveCard(card, fromCol, toCol) {
+    var revertSibling = card.nextElementSibling;
+    var oldFooter = card.querySelector("footer.done");
+    var oldFooterText = oldFooter ? oldFooter.textContent : "";
+    var newStatus = toCol.dataset.status;
+
+    toCol.appendChild(card);
+    if (newStatus !== "done") setDoneFooter(card, "");
+    recount();
+
+    fetch("/status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ number: parseInt(card.dataset.number, 10), status: newStatus })
+    }).then(function (res) {
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.json();
+    }).then(function (data) {
+      if (newStatus === "done" && data.date) setDoneFooter(card, "Done " + data.date);
+      patchSource(card, data);
+    }).catch(function (err) {
+      fromCol.insertBefore(card, revertSibling);
+      setDoneFooter(card, oldFooterText);
+      recount();
+      showToast("Failed to move #" + card.dataset.number + " — " + err.message);
+    });
+  }
+
+  if (SERVE) {
+    var dragCard = null;
+    cards.forEach(function (card) {
+      card.setAttribute("draggable", "true");
+      card.addEventListener("dragstart", function (e) {
+        dragCard = card;
+        suppressClick = true;
+        card.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", card.dataset.number);
+      });
+      card.addEventListener("dragend", function () {
+        card.classList.remove("dragging");
+        dragCard = null;
+        columns.forEach(function (c) { c.classList.remove("drag-over"); });
+        setTimeout(function () { suppressClick = false; }, 0);
+      });
+    });
+    columns.forEach(function (col) {
+      col.addEventListener("dragover", function (e) {
+        if (!dragCard) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        col.classList.add("drag-over");
+      });
+      col.addEventListener("dragleave", function (e) {
+        if (!col.contains(e.relatedTarget)) col.classList.remove("drag-over");
+      });
+      col.addEventListener("drop", function (e) {
+        if (!dragCard) return;
+        e.preventDefault();
+        col.classList.remove("drag-over");
+        var fromCol = dragCard.closest(".column");
+        if (fromCol !== col) moveCard(dragCard, fromCol, col);
+      });
+    });
+  }
+})();
+  </script>
+</body>
+</html>
