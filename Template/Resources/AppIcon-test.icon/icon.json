@@ -1,8 +1,8 @@
 {
   "fill" : {
     "linear-gradient" : [
-      "display-p3:0.91917,0.27921,0.21697,1.00000",
-      "display-p3:0.50000,0.03667,0.06073,1.00000"
+      "extended-gray:0.32729,1.00000",
+      "display-p3:0.00000,0.00000,0.00000,1.00000"
     ],
     "orientation" : {
       "start" : {
@@ -20,7 +20,7 @@
       "layers" : [
         {
           "fill" : {
-            "automatic-gradient" : "display-p3:0.15720,0.36102,0.13651,1.00000"
+            "automatic-gradient" : "display-p3:0.34684,0.36102,0.63041,1.00000"
           },
           "image-name" : "template_letter_T.svg",
           "name" : "template_letter_T",
