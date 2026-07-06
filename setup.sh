@@ -20,7 +20,7 @@ Description:
     3. Removes template git history and bootstrap scripts (rename_project.sh + this script)
 
   Arguments:
-    <ProjectName>   Must start with a letter; letters and digits only. E.g. "Keybo".
+    <ProjectName>   Must start with a letter; letters and digits only. E.g. "Keymoji".
 
   After it finishes, initialize fresh source control:
     git init && git add . && git commit -m "🎉 Create a project"
