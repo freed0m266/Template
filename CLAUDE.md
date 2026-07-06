@@ -2,6 +2,9 @@
 
 iOS app template with a modular SwiftUI architecture, managed with Tuist.
 
+`AGENTS.md` is the fuller guide (build, feature pattern, style, task workflow, git hygiene); this file
+is a quick summary.
+
 ## Targets
 
 - **Template** — Main app entry point (placeholder ContentView)
@@ -15,6 +18,9 @@ iOS app template with a modular SwiftUI architecture, managed with Tuist.
 
 - Build system: Tuist (`tuist generate` to regenerate Xcode project)
 - Swift 6.0, iOS 26+
+- Two Tuist environments select bundle ID / display name / icon. Default is `Testing` (a sandboxed
+  `.test` build that installs alongside production); regenerate for a production archive with
+  `TUIST_ENVIRONMENT=Production tuist generate` (see [ADR 0001](docs/adr/0001-tuist-environments-default-testing.md)).
 
 ## Architecture
 

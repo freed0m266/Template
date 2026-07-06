@@ -26,13 +26,31 @@ open MyProjectName.xcworkspace
 
 `ProjectName` must start with a letter and contain only letters and digits (e.g. `Keybo`, `WidgetCoin`).
 
+## Environments
+
+Two Tuist environments select the bundle ID, home-screen display name, and app icon. They are resolved
+at `tuist generate` time from the `TUIST_ENVIRONMENT` env-var:
+
+- **Testing** (default) — a sandboxed `.test` build: `MyProject TEST` on the home screen, a recolored
+  `AppIcon-test`, and a `.test`-suffixed bundle ID, so it installs *alongside* a production build.
+  Everyday `tuist generate && Run` gives you this.
+- **Production** — the shippable identifiers. **A production archive MUST regenerate with the env-var:**
+
+  ```bash
+  TUIST_ENVIRONMENT=Production tuist generate
+  ```
+
+  Without it, the workspace bakes in `.test` identifiers and any archive from it is a TEST build. See
+  [ADR 0001](docs/adr/0001-tuist-environments-default-testing.md). The Apple team ID is a placeholder
+  (`TeamID.placeholder`) — set it in `Tuist/ProjectDescriptionHelpers/TeamID.swift` for a real project.
+
 ## Requirements
 
 - Xcode 26+
 - iOS 26+
 - [Tuist](https://tuist.io) — project generation
 - [Mint](https://github.com/yonaskolb/Mint) — SwiftLint via build phase
-- [Codex CLI](https://github.com/openai/codex) (optional) — used by the `/task` Claude command for closing code review
+- [Codex CLI](https://github.com/openai/codex) — the `/task` closing review runs `codex review --uncommitted` on the staged diff
 
 ```bash
 # Install Tuist if you don't have it
@@ -65,12 +83,18 @@ Template/
 │       ├── Sources/                # View, ViewModel, Dependencies
 │       ├── Testing/                # Mock ViewModel (DEBUG)
 │       └── Tests/                  # Snapshot tests
-├── tasks/                          # Implementation roadmap (numbered task specs)
+├── tasks/                          # Implementation roadmap (numbered task specs) + dashboard
+├── docs/adr/                       # Architecture Decision Records
 ├── scripts/                        # Helper scripts
-│   └── new_feature.sh              # Scaffold a new Features/<Name>/ from Example
+│   ├── new_feature.sh              # Scaffold a new Features/<Name>/ from Example
+│   ├── generate_dashboard.py       # Render a Kanban board of the task files
+│   ├── clean_worktrees.sh          # Remove stale Claude Code worktrees
+│   └── delete_snapshot_references.sh  # Delete snapshot reference PNGs (force re-record)
 ├── setup.sh                        # One-shot bootstrap (deletes itself after running)
 └── Tuist/                          # Build system configuration
     └── ProjectDescriptionHelpers/
+        ├── Environment/            # Testing/Production env system (AppSetup, Environment)
+        └── Targets/                # Per-target factories
 ```
 
 ## Architecture
@@ -99,10 +123,16 @@ tuist generate
 
 `tasks/` holds numbered task specs (see [`tasks/README.md`](tasks/README.md) for the convention).
 
-`.claude/commands/task.md` defines a Claude slash command for working through a numbered task:
+`.claude/commands/task.md` defines a Claude slash command for working through a numbered task, mirrored
+for Codex in `.codex/skills/task/SKILL.md`. The closing review is **cross-model**: driven from Claude it
+runs Codex (`codex review --uncommitted`); driven from Codex it runs Claude (`claude -p`) — the reviewer
+is always the other model.
 
-- **`/task <number>`** — pick up the task, branch off `main`, implement it, run Codex code review on the staged diff, then mark it Done.
-- **`/task <number> --skip-review`** — same as above but skips the Codex review step. Use for purely mechanical scaffolding tasks where review wouldn't catch anything substantive.
+- **`/task <number>`** — pick up the task, branch off `main`, implement it, run the closing review on the staged diff, then mark it Done.
+- **`/task <number> --skip-review`** — same as above but skips the review step. Use for purely mechanical scaffolding tasks where review wouldn't catch anything substantive.
+
+Run `python3 scripts/generate_dashboard.py` for a Kanban board of the task files (`--serve` for a live
+board with drag-and-drop status changes written back into the `.md` files).
 
 ## Dependencies
 
