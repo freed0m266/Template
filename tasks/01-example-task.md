@@ -23,7 +23,7 @@ Každá sub-section by měla být buildable krok — soubor, který se vytvoří
 
 ### 2. Testy
 
-Vyjmenuj konkrétní testy. Unit (KeyboardCore-style) nebo snapshot (KeyboardUI-style). Co se assertuje, jaké edge cases.
+Vyjmenuj konkrétní testy. Unit (Core-style) nebo snapshot (UI-style). Co se assertuje, jaké edge cases.
 
 ### 3. Lokalizace
 

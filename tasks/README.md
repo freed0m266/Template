@@ -1,5 +1,10 @@
 # Roadmap
 
+> Status snapshot: [dashboard.html](dashboard.html) — a dark-mode Kanban board of these task files.
+> Regenerate the static snapshot with `python3 scripts/generate_dashboard.py`. A live board with
+> drag-and-drop status changes (written back into the `.md` files) runs via
+> `python3 scripts/generate_dashboard.py --serve`; clicking a card opens the full task in a modal.
+
 Numbered task specs for the project. Each task is a self-contained markdown document with a
 fixed structure (goal, context, scope, out-of-scope, done criteria, risks, references).
 
@@ -65,6 +70,9 @@ Concrete steps with file paths.
 
 - File paths, external documentation links.
 ```
+
+The `**Status:**`, `**Priorita:** · **Úsilí:** · **Dopad:**`, and `## Cíl` (or `## Souhrn`) lines are
+load-bearing: `scripts/generate_dashboard.py` parses them to build the board. Keep their exact shape.
 
 ## Current tasks
 
