@@ -69,7 +69,7 @@ public let ${name_camel} = Feature(
 	name: "${name_pascal}",
 	dependencies: [
 		.target(name: core.name),
-		.target(name: designSystem.name),
+		.target(name: design.name),
 		.target(name: resources.name)
 	],
 	hasTests: true,
@@ -82,7 +82,7 @@ insert_feature_in_project_manifest() {
     local file="$2"
     local tmp
 
-    if grep -Eq "^[[:space:]]*${entry},[[:space:]]*$" "$file"; then
+    if grep -Eq "^[[:space:]]*${entry},?[[:space:]]*$" "$file"; then
         return
     fi
 
@@ -92,6 +92,7 @@ insert_feature_in_project_manifest() {
         BEGIN {
             inFeatures = 0
             inserted = 0
+            held = ""
         }
 
         /^let features: \[Feature\] = \[/ {
@@ -101,27 +102,49 @@ insert_feature_in_project_manifest() {
         }
 
         inFeatures {
+            # The list uses no-trailing-comma style, so appending at the end
+            # must add a comma to the previous last entry. Hold each line back
+            # one step so it can still be amended when the bracket shows up.
             if ($0 ~ /^\]/) {
                 if (!inserted) {
-                    print "\t" entry ","
+                    if (held != "") {
+                        sub(/[[:space:]]*$/, "", held)
+                        if (held !~ /,$/) {
+                            held = held ","
+                        }
+                        print held
+                        held = ""
+                    }
+                    print "\t" entry
                     inserted = 1
+                }
+                if (held != "") {
+                    print held
+                    held = ""
                 }
                 inFeatures = 0
                 print
                 next
             }
 
-            if (!inserted && $0 ~ /^[[:space:]]*[A-Za-z0-9_]+,[[:space:]]*$/) {
+            if (held != "") {
+                print held
+                held = ""
+            }
+
+            if (!inserted && $0 ~ /^[[:space:]]*[A-Za-z0-9_]+,?[[:space:]]*$/) {
                 current = $0
                 gsub(/^[[:space:]]+/, "", current)
-                sub(/,[[:space:]]*$/, "", current)
+                sub(/,?[[:space:]]*$/, "", current)
                 if (entry < current) {
                     print "\t" entry ","
                     inserted = 1
+                    print
+                    next
                 }
             }
 
-            print
+            held = $0
             next
         }
 
@@ -148,7 +171,7 @@ insert_dependency_in_app_manifest() {
     local file="$2"
     local tmp
 
-    if grep -Eq "^[[:space:]]*\.target\(${entry}\),[[:space:]]*$" "$file"; then
+    if grep -Eq "^[[:space:]]*\.target\(${entry}\),?[[:space:]]*$" "$file"; then
         return
     fi
 
@@ -158,6 +181,7 @@ insert_dependency_in_app_manifest() {
         BEGIN {
             inDeps = 0
             inserted = 0
+            held = ""
         }
 
         /dependencies:[[:space:]]*\[/ {
@@ -167,27 +191,49 @@ insert_dependency_in_app_manifest() {
         }
 
         inDeps {
+            # Same no-trailing-comma handling as the features list: hold each
+            # line back one step so the last entry can gain a comma when the
+            # new dependency lands at the end.
             if ($0 ~ /^[[:space:]]*\],?[[:space:]]*$/) {
                 if (!inserted) {
-                    print "\t\t.target(" entry "),"
+                    if (held != "") {
+                        sub(/[[:space:]]*$/, "", held)
+                        if (held !~ /,$/) {
+                            held = held ","
+                        }
+                        print held
+                        held = ""
+                    }
+                    print "\t\t.target(" entry ")"
                     inserted = 1
+                }
+                if (held != "") {
+                    print held
+                    held = ""
                 }
                 inDeps = 0
                 print
                 next
             }
 
-            if (!inserted && $0 ~ /^[[:space:]]*\.target\([A-Za-z0-9_]+\),[[:space:]]*$/) {
+            if (held != "") {
+                print held
+                held = ""
+            }
+
+            if (!inserted && $0 ~ /^[[:space:]]*\.target\([A-Za-z0-9_]+\),?[[:space:]]*$/) {
                 current = $0
                 gsub(/^[[:space:]]*\.target\(/, "", current)
-                sub(/\),[[:space:]]*$/, "", current)
+                sub(/\),?[[:space:]]*$/, "", current)
                 if (entry < current) {
                     print "\t\t.target(" entry "),"
                     inserted = 1
+                    print
+                    next
                 }
             }
 
-            print
+            held = $0
             next
         }
 
