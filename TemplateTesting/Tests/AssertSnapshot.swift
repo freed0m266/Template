@@ -3,8 +3,7 @@ import SwiftUI
 import XCTest
 
 let devices = [
-	ViewImageConfig.iPhone8Plus,
-	.iPhone13ProMax
+	ViewImageConfig.iPhone13ProMax
 ]
 
 /// Checks if the given view matches the image references on the disk.
@@ -16,9 +15,9 @@ let devices = [
 public func AssertSnapshot<View: SwiftUI.View>(
 	_ view: View,
 	layout: SwiftUISnapshotLayout? = nil,
-	record: Bool = false,
+	record: SnapshotTestingConfiguration.Record? = .missing,
 	line: UInt = #line,
-	file: StaticString = #file,
+	file: StaticString = #filePath,
 	function: String = #function,
 	perceptualPrecision: Float = 0.93,
 	longContentSnapshotHeight: CGFloat? = nil
@@ -67,7 +66,7 @@ private func imageStrategies<View: SwiftUI.View>(
 	perceptualPrecision: Float
 ) -> [Snapshotting<View, UIImage>] {
 	// Add dark mode once implemented
-	let interfaceStyles: [UIUserInterfaceStyle] = [.light]
+	let interfaceStyles: [UIUserInterfaceStyle] = [.light, .dark]
 	return interfaceStyles.map { style in
 			.image(
 				drawHierarchyInKeyWindow: false,
