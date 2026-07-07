@@ -1,5 +1,6 @@
 # Tuist
 Derived/
+Tuist/ProjectDescriptionHelpers/TeamID.swift
 *.xcodeproj
 *.xcworkspace
 
