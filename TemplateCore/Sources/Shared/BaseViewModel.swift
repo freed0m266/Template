@@ -9,6 +9,7 @@
 import Foundation
 import os.log
 
+@Observable
 @MainActor
 open class BaseViewModel {
 	public var isLoading = false
