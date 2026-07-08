@@ -7,10 +7,11 @@
 //
 
 import Foundation
+import Observation
 import os.log
 
-@Observable
 @MainActor
+@Observable
 open class BaseViewModel {
 	public var isLoading = false
 	public var errorMessage: String?

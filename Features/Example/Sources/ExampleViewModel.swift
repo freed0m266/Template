@@ -6,7 +6,7 @@
 //  Copyright © 2026 Freedom Martin, s.r.o. All rights reserved.
 //
 
-import Foundation
+import Observation
 import TemplateCore
 
 @MainActor

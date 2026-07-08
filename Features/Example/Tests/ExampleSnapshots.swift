@@ -10,8 +10,8 @@ import XCTest
 import TemplateTesting
 @testable import Example
 
+@MainActor
 class ExampleSnapshots: XCTestCase {
-	@MainActor
 	func testPreviews() {
 		let view = ExampleView(viewModel: ExampleViewModelMock())
 		AssertSnapshot(view)

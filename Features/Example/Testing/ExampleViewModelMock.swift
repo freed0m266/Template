@@ -7,9 +7,10 @@
 //
 
 import Foundation
+import Observation
 
-@Observable
 @MainActor
+@Observable
 final class ExampleViewModelMock: ExampleViewModeling {
 	func refreshData() async { }
 }
