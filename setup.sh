@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
 # One-shot project bootstrap for the Template repository.
-# Renames Template → <ProjectName>, resolves and generates the Xcode project via Tuist,
-# then removes the bootstrap artefacts (rename script + template git history + this script).
+# Renames Template → <ProjectName>, asks for the Apple Developer Team ID (optional), resolves
+# and generates the Xcode project via Tuist, then removes the bootstrap artefacts
+# (rename script + template git history + this script).
 #
 # Run exactly ONCE, immediately after cloning the template.
 
@@ -16,8 +17,9 @@ Usage:
 Description:
   One-shot bootstrap. Run exactly once right after cloning the template:
     1. Renames Template → <ProjectName> across files, directories, and project root
-    2. Installs Tuist dependencies (`tuist install`) and generates the Xcode project (`tuist generate`)
-    3. Removes template git history and bootstrap scripts (rename_project.sh + this script)
+    2. Asks for your Apple Developer Team ID and wires it into code signing (Enter to skip)
+    3. Installs Tuist dependencies (`tuist install`) and generates the Xcode project (`tuist generate`)
+    4. Removes template git history and bootstrap scripts (rename_project.sh + this script)
 
   Arguments:
     <ProjectName>   Must start with a letter; letters and digits only. E.g. "Keymoji".
@@ -71,6 +73,57 @@ echo "==> Renaming Template -> $NEW_NAME..."
 # the file descriptor still resolves, but explicit `cd` to the new path keeps relative
 # commands sane for the rest of the script.
 cd "$NEW_PROJECT_DIR"
+
+# Optionally replace the empty `TeamID.placeholder` with a real, named Apple Developer team so
+# the generated project has DEVELOPMENT_TEAM set from day one. Skippable — the template builds
+# fine unsigned (see TeamID.swift).
+echo
+echo "==> Configuring code signing..."
+TEAM_ID=""
+if [[ -t 0 ]]; then
+	while true; do
+		read -r -p "Apple Developer Team ID (Enter to skip): " TEAM_ID
+		if [[ -z "$TEAM_ID" || "$TEAM_ID" =~ ^[A-Z0-9]{10}$ ]]; then
+			break
+		fi
+		echo "Invalid Team ID: expected 10 uppercase letters/digits, e.g. DSKL7YS6PW." >&2
+	done
+else
+	echo "Non-interactive shell — skipping Team ID setup."
+fi
+
+if [[ -z "$TEAM_ID" ]]; then
+	echo "Signing left unconfigured (TeamID.placeholder); set it later in Tuist/ProjectDescriptionHelpers/TeamID.swift."
+else
+	while true; do
+		read -r -p "Swift constant name for the team (e.g. freedomMartin): " TEAM_CONSTANT
+		if [[ "$TEAM_CONSTANT" =~ ^[a-z][A-Za-z0-9]*$ ]]; then
+			break
+		fi
+		echo "Invalid name: must be a lowerCamelCase Swift identifier (letters/digits, lowercase first)." >&2
+	done
+
+	cat > Tuist/ProjectDescriptionHelpers/TeamID.swift <<EOF
+import Foundation
+
+/// The Apple Developer team identifier, wrapped in a value type so signing settings read as
+/// \`.$TEAM_CONSTANT\` rather than a bare string. \`ExpressibleByStringInterpolation\` lets the raw ID
+/// be interpolated straight into a \`SettingsDictionary\` value.
+public struct TeamID: ExpressibleByStringInterpolation, CustomStringConvertible, Sendable {
+	public static let $TEAM_CONSTANT: Self = "$TEAM_ID"
+
+	public let description: String
+
+	public init(stringLiteral value: String) {
+		description = value
+	}
+}
+EOF
+
+	TEAM_CONSTANT="$TEAM_CONSTANT" perl -i -pe 's/\{ \.placeholder \}/{ .$ENV{TEAM_CONSTANT} }/' \
+		Tuist/ProjectDescriptionHelpers/Environment/AppSetup.swift
+	echo "Set DEVELOPMENT_TEAM to $TEAM_ID (TeamID.$TEAM_CONSTANT)."
+fi
 
 echo
 echo "==> Installing Tuist dependencies..."
