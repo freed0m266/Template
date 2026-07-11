@@ -12,9 +12,9 @@ Description:
   files/directories that contain the keyword in their names.
 
   Replacements are case-sensitive:
-    Template -> <ProjectName>
-    template -> <projectname-lowercase>
-    TEMPLATE -> <PROJECTNAME-UPPERCASE>
+    Template -> <ProjectName>            (substring; also inside PascalCase, e.g. TemplateCore)
+    template -> <projectname-lowercase>  (whole token only — skips grid-template-columns etc.)
+    TEMPLATE -> <PROJECTNAME-UPPERCASE>  (whole token only)
 
   Ignored directories (any depth):
     .git, .build, .swiftpm, .tuist, Derived, Products, Frameworks
@@ -49,16 +49,34 @@ OLD_NAME_LOWER="template"
 OLD_NAME_UPPER="TEMPLATE"
 NEW_NAME_LOWER="$(printf '%s' "$NEW_NAME" | tr '[:upper:]' '[:lower:]')"
 NEW_NAME_UPPER="$(printf '%s' "$NEW_NAME" | tr '[:lower:]' '[:upper:]')"
+export NEW_NAME NEW_NAME_LOWER NEW_NAME_UPPER
+
+# Single substitution program, shared by file-content and file/dir-name renaming
+# so the two can never diverge (a renamed file keeps matching its references).
+#
+# PascalCase `Template` is a type/module/target prefix (TemplateCore, TemplateUI)
+# and must be replaced even inside a compound -> plain substring. Capital-T
+# `Template` does not collide with common English or CSS words, so that is safe.
+#
+# The lowercase / UPPERCASE variants ARE common words ("template",
+# `grid-template-columns`, `feature_template_dir`), so they are replaced only as
+# a standalone identifier token — not when glued to another identifier character
+# ([A-Za-z0-9_-]). Dot/slash/quote-delimited tokens such as the
+# `com.acme.template` bundle ID still match; CSS keywords and snake_case
+# identifiers do not. Replacement values arrive via %ENV so they are never
+# interpreted as regex.
+PERL_RENAME_PROG='
+    s/Template/$ENV{NEW_NAME}/g;
+    s/(?<![A-Za-z0-9_-])template(?![A-Za-z0-9_-])/$ENV{NEW_NAME_LOWER}/g;
+    s/(?<![A-Za-z0-9_-])TEMPLATE(?![A-Za-z0-9_-])/$ENV{NEW_NAME_UPPER}/g;
+'
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$SCRIPT_DIR"
 
 transform_string() {
     local input="$1"
-    input="${input//${OLD_NAME}/${NEW_NAME}}"
-    input="${input//${OLD_NAME_LOWER}/${NEW_NAME_LOWER}}"
-    input="${input//${OLD_NAME_UPPER}/${NEW_NAME_UPPER}}"
-    printf '%s' "$input"
+    printf '%s' "$input" | perl -pe "$PERL_RENAME_PROG"
 }
 
 contains_old_tokens() {
@@ -100,9 +118,7 @@ while IFS= read -r -d '' file; do
     if [[ "$DRY_RUN" == "true" ]]; then
         echo "[DRY-RUN] would update text: $file"
     else
-        perl -i -pe \
-            "s/${OLD_NAME}/${NEW_NAME}/g; s/${OLD_NAME_LOWER}/${NEW_NAME_LOWER}/g; s/${OLD_NAME_UPPER}/${NEW_NAME_UPPER}/g" \
-            "$file"
+        perl -i -pe "$PERL_RENAME_PROG" "$file"
         echo "updated text: $file"
     fi
 done < <(
