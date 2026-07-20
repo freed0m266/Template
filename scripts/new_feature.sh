@@ -19,7 +19,7 @@ first_char_lower="$(printf '%s' "${name_pascal:0:1}" | tr '[:upper:]' '[:lower:]
 name_camel="${first_char_lower}${name_pascal:1}"
 created_date="$(date '+%d.%m.%Y')"
 
-feature_template_dir="Features/Example"
+feature_template_dir="scripts/templates/Feature"
 feature_destination_dir="Features/${name_pascal}"
 tuist_feature_file="Tuist/ProjectDescriptionHelpers/Targets/Features/${name_pascal}.swift"
 project_manifest="Project.swift"
@@ -44,22 +44,20 @@ fi
 
 cp -R "$feature_template_dir" "$feature_destination_dir"
 
-# Rename files/directories whose names contain Example/example.
+# Rename files/directories containing the feature placeholder.
 while IFS= read -r -d '' path; do
     dir_name="$(dirname "$path")"
     base_name="$(basename "$path")"
-    new_base_name="${base_name//Example/$name_pascal}"
-    new_base_name="${new_base_name//example/$name_camel}"
+    new_base_name="${base_name//__FEATURE__/$name_pascal}"
 
     if [[ "$new_base_name" != "$base_name" ]]; then
         mv "$path" "$dir_name/$new_base_name"
     fi
-done < <(find "$feature_destination_dir" -depth \( -name '*Example*' -o -name '*example*' \) -print0)
+done < <(find "$feature_destination_dir" -depth -name '*__FEATURE__*' -print0)
 
-# Update file contents from Example/example to new names.
+# Fill placeholders without keeping a live template target in the app graph.
 while IFS= read -r -d '' file; do
-    perl -pi -e "s/Example/${name_pascal}/g; s/example/${name_camel}/g" "$file"
-    CREATED_DATE="$created_date" perl -pi -e 's#(//\s+Created by Martin Svoboda on )\d{2}\.\d{2}\.\d{4}(\.)#$1.$ENV{CREATED_DATE}.$2#e' "$file"
+    perl -pi -e "s/__FEATURE__/${name_pascal}/g; s/__feature__/${name_camel}/g; s/__CREATED_DATE__/${created_date}/g" "$file"
 done < <(find "$feature_destination_dir" -type f ! -name '.DS_Store' -print0)
 
 cat > "$tuist_feature_file" <<TUIST
@@ -93,6 +91,15 @@ insert_feature_in_project_manifest() {
             inFeatures = 0
             inserted = 0
             held = ""
+        }
+
+        /^let features: \[Feature\] = \[[[:space:]]*\][[:space:]]*$/ {
+            sub(/\[[[:space:]]*\][[:space:]]*$/, "[")
+            print
+            print "\t" entry
+            print "]"
+            inserted = 1
+            next
         }
 
         /^let features: \[Feature\] = \[/ {
@@ -191,6 +198,18 @@ insert_dependency_in_app_manifest() {
         }
 
         inDeps {
+            # Features belong with internal target dependencies, before externals.
+            if (!inserted && $0 ~ /^[[:space:]]*\.external\(/) {
+                if (held != "") {
+                    print held
+                    held = ""
+                }
+                print "\t\t.target(" entry "),"
+                inserted = 1
+                print
+                next
+            }
+
             # Same no-trailing-comma handling as the features list: hold each
             # line back one step so the last entry can gain a comma when the
             # new dependency lands at the end.

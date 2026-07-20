@@ -12,7 +12,7 @@ is a quick summary.
 - **TemplateUI** — Design system (View extensions, Icon wrapper, reusable components)
 - **TemplateResources** — Localization strings and `L10n` alias
 - **TemplateTesting** — Snapshot testing utilities (`AssertSnapshot` helper)
-- **Feature modules** (`Features/`) — Independent feature frameworks: `Example`
+- **Feature modules** (`Features/`) — Independent feature frameworks
 
 ## Build
 
@@ -27,10 +27,10 @@ is a quick summary.
 - MVVM with UseCases and Repository layers
 - Protocol-first design: every ViewModel, UseCase, Repository, and Service has a protocol
 - ViewModels use `@Observable` macro, inherit from `BaseViewModel`
-- Views are generic over ViewModel protocols: `struct ExampleView<ViewModel: ExampleViewModeling>: View`
+- Views are generic over ViewModel protocols: `struct FeatureView<ViewModel: FeatureViewModeling>: View`
 - Constructor-based DI via global `AppDependency` singleton (`nonisolated(unsafe) let dependencies`)
 - Each feature has a `*Dependencies` struct + `AppDependency` extension providing its deps
-- ViewModel factory functions: `exampleVM()`
+- ViewModel factory functions: `featureVM()`
 - Mocks in `Testing/` directories, wrapped in `#if DEBUG`, used for SwiftUI previews
 
 ## Feature Module Structure

@@ -19,7 +19,7 @@ iOS app template with a modular SwiftUI architecture, managed with Tuist. Clone 
 - `TemplateUI`: design system — `Icon`, view extensions, reusable components.
 - `TemplateResources`: localized strings and the generated `L10n` alias.
 - `TemplateTesting`: snapshot helpers (`AssertSnapshot`).
-- `Features/*`: independent feature frameworks. Ships with the `Example` reference feature.
+- `Features/*`: independent feature frameworks.
 
 ## Build And Generation
 
@@ -50,7 +50,7 @@ xcodebuild -workspace Template.xcworkspace -scheme Template -destination 'generi
 - Run focused test schemes when touching a target, using an installed iPhone simulator:
 
 ```bash
-xcodebuild test -project Template.xcodeproj -scheme Example_Tests -destination 'platform=iOS Simulator,name=<available iPhone>'
+xcodebuild test -project Template.xcodeproj -scheme <Feature>_Tests -destination 'platform=iOS Simulator,name=<available iPhone>'
 ```
 
 - SwiftLint runs through a build phase via Mint. Keep code lint-clean instead of bypassing it.
@@ -76,9 +76,9 @@ Feature modules follow MVVM with protocol-first view models:
 - `@MainActor public protocol <Name>ViewModeling: Observable, AnyObject`.
 - Concrete view models use `@Observable`, inherit `BaseViewModel`, and are `internal` unless a public
   surface is required.
-- Views are generic over the protocol, e.g. `struct ExampleView<ViewModel: ExampleViewModeling>: View`.
+- Views are generic over the protocol, e.g. `struct FeatureView<ViewModel: FeatureViewModeling>: View`.
 - Views hold state with `@State private var viewModel`; use `@Bindable` when bindings are needed.
-- Factory functions are public and main-actor isolated, e.g. `public func exampleVM() -> some ExampleViewModeling`.
+- Factory functions are public and main-actor isolated, e.g. `public func featureVM() -> some FeatureViewModeling`.
 - Mocks live in `Features/<Name>/Testing/`, wrapped in `#if DEBUG`, and power previews/snapshots.
 
 Preferred layout:
@@ -95,7 +95,8 @@ Features/<Name>/
     <Name>Snapshots.swift
 ```
 
-Use `./scripts/new_feature.sh FeatureName` to scaffold a new feature from `Example`, then run
+Use `./scripts/new_feature.sh FeatureName` to scaffold a new feature from the isolated
+`scripts/templates/Feature` template, then run
 `tuist generate`.
 
 ## Swift Style

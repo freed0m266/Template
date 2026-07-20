@@ -47,5 +47,5 @@ Pokud feature vkládá uživatelsky-viditelné texty: přidej klíče do `Templa
 ## Reference
 
 - `CLAUDE.md` — projektové konvence
-- `Features/Example/` — referenční implementace pro feature framework
+- `scripts/templates/Feature/` — scaffold pro feature framework
 - Apple HIG / iOS API docs — pokud se feature dotýká platformy

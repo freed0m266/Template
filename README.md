@@ -79,14 +79,10 @@ Template/
 ├── TemplateResources/              # Localization (L10n alias)
 ├── TemplateTesting/                # AssertSnapshot helper
 ├── Features/                       # Independent feature frameworks
-│   └── Example/
-│       ├── Sources/                # View, ViewModel, Dependencies
-│       ├── Testing/                # Mock ViewModel (DEBUG)
-│       └── Tests/                  # Snapshot tests
 ├── tasks/                          # Implementation roadmap (numbered task specs) + dashboard
 ├── docs/adr/                       # Architecture Decision Records
 ├── scripts/                        # Helper scripts
-│   ├── new_feature.sh              # Scaffold a new Features/<Name>/ from Example
+│   ├── new_feature.sh              # Scaffold a new Features/<Name>/ from the feature template
 │   ├── generate_dashboard.py       # Render a Kanban board of the task files
 │   ├── clean_worktrees.sh          # Remove stale Claude Code worktrees
 │   └── delete_snapshot_references.sh  # Delete snapshot reference PNGs (force re-record)
