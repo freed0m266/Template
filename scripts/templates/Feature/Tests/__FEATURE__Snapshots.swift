@@ -6,8 +6,8 @@
 //  Copyright © 2026 Freedom Martin, s.r.o. All rights reserved.
 //
 
-import TemplateTesting
 import XCTest
+import TemplateTesting
 @testable import __FEATURE__
 
 @MainActor

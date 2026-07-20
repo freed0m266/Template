@@ -10,7 +10,7 @@ import Observation
 import TemplateCore
 
 @MainActor
-public protocol __FEATURE__ViewModeling: Observable, AnyObject {
+public protocol __FEATURE__ViewModeling: Observable {
 }
 
 @MainActor
@@ -18,7 +18,6 @@ public func __feature__VM() -> some __FEATURE__ViewModeling {
 	__FEATURE__ViewModel(dependencies: dependencies.__feature__)
 }
 
-@MainActor
 @Observable
 final class __FEATURE__ViewModel: BaseViewModel, __FEATURE__ViewModeling {
 

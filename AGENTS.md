@@ -73,7 +73,7 @@ View → ViewModel → UseCase → Repository → Service (API)
 
 Feature modules follow MVVM with protocol-first view models:
 
-- `@MainActor public protocol <Name>ViewModeling: Observable, AnyObject`.
+- `@MainActor public protocol <Name>ViewModeling: Observable`.
 - Concrete view models use `@Observable`, inherit `BaseViewModel`, and are `internal` unless a public
   surface is required.
 - Views are generic over the protocol, e.g. `struct FeatureView<ViewModel: FeatureViewModeling>: View`.
