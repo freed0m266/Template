@@ -33,7 +33,6 @@ public let app: Target = .target(
 	dependencies: [
 		.target(core),
 		.target(design),
-		.target(example),
 		.target(resources)
 	],
 	settings: .settings(
