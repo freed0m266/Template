@@ -7,11 +7,10 @@
 //
 
 import SwiftUI
-import Example
 
 struct ContentView: View {
 	var body: some View {
-		ExampleView(viewModel: exampleVM())
+		Text("Template")
 	}
 }
 

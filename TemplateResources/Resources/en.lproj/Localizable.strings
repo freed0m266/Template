@@ -1,6 +1,5 @@
 "error.defaultMessage" = "Unexpected error has occurred. Please try again later.";
 "error.defaultTitle" = "Error";
-"example.welcomeText" = "Hello, World!";
 "general.cancel" = "Cancel";
 "general.error" = "Error";
 "general.no" = "No";
