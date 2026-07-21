@@ -5,10 +5,6 @@ let package = Package(
 	name: "PackageName",
 	dependencies: [
 		.package(
-			url: "https://github.com/freed0m266/BaseKitX",
-			from: "1.4.0"
-		),
-		.package(
 			url: "https://github.com/SwiftyBeaver/SwiftyBeaver",
 			from: "2.1.0"
 		),
