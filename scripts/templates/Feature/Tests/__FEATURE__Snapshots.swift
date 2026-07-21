@@ -13,6 +13,7 @@ import TemplateTesting
 @MainActor
 final class __FEATURE__Snapshots: XCTestCase {
 	func testPreviews() {
-		AssertSnapshot(__FEATURE__View(viewModel: __FEATURE__ViewModelMock()))
+		let view = __FEATURE__View(viewModel: __FEATURE__ViewModelMock()).inPreview()
+		AssertSnapshot(view)
 	}
 }

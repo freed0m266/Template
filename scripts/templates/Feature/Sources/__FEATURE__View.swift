@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import TemplateUI
 
 public struct __FEATURE__View<ViewModel: __FEATURE__ViewModeling>: View {
 	@State private var viewModel: ViewModel
@@ -22,6 +23,6 @@ public struct __FEATURE__View<ViewModel: __FEATURE__ViewModeling>: View {
 
 #if DEBUG
 #Preview {
-	__FEATURE__View(viewModel: __FEATURE__ViewModelMock())
+	__FEATURE__View(viewModel: __FEATURE__ViewModelMock()).inPreview()
 }
 #endif
