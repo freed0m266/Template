@@ -1,7 +1,9 @@
 # Template
 
+<!-- template-description -->
 iOS app template with a modular SwiftUI architecture, managed with Tuist.
 
+<!-- template-only:start -->
 ## Quick start
 
 After cloning, bootstrap a fresh project in one command:
@@ -13,8 +15,10 @@ After cloning, bootstrap a fresh project in one command:
 This will:
 
 1. Rename `Template` → `MyProjectName` across files, directories, and the project root.
-2. Run `tuist install` and `tuist generate`.
-3. Remove bootstrap artefacts (the rename script, the template's `.git`, and `setup.sh` itself).
+2. Strip the template-only sections out of the docs (see `scripts/finalize_docs.sh`).
+3. Run `tuist install` and `tuist generate`.
+4. Remove bootstrap artefacts (the rename and doc-finalize scripts, the template's `.git`, and
+   `setup.sh` itself).
 
 Once it finishes, initialize fresh source control:
 
@@ -25,13 +29,14 @@ open MyProjectName.xcworkspace
 ```
 
 `ProjectName` must start with a letter and contain only letters and digits (e.g. `Keybo`, `WidgetCoin`).
+<!-- template-only:end -->
 
 ## Environments
 
 Two Tuist environments select the bundle ID, home-screen display name, and app icon. They are resolved
 at `tuist generate` time from the `TUIST_ENVIRONMENT` env-var:
 
-- **Testing** (default) — a sandboxed `.test` build: `MyProject TEST` on the home screen, a recolored
+- **Testing** (default) — a sandboxed `.test` build: `Template TEST` on the home screen, a recolored
   `AppIcon-test`, and a `.test`-suffixed bundle ID, so it installs *alongside* a production build.
   Everyday `tuist generate && Run` gives you this.
 - **Production** — the shippable identifiers. **A production archive MUST regenerate with the env-var:**
@@ -86,7 +91,6 @@ Template/
 │   ├── generate_dashboard.py       # Render a Kanban board of the task files
 │   ├── clean_worktrees.sh          # Remove stale Claude Code worktrees
 │   └── delete_snapshot_references.sh  # Delete snapshot reference PNGs (force re-record)
-├── setup.sh                        # One-shot bootstrap (deletes itself after running)
 └── Tuist/                          # Build system configuration
     └── ProjectDescriptionHelpers/
         ├── Environment/            # Testing/Production env system (AppSetup, Environment)
@@ -95,7 +99,7 @@ Template/
 
 ## Architecture
 
-The template follows **MVVM** with **UseCases** and a **Repository** layer:
+The project follows **MVVM** with **UseCases** and a **Repository** layer:
 
 ```
 View → ViewModel → UseCase → Repository → Service (API)

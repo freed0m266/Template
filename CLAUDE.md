@@ -1,5 +1,6 @@
 # Template
 
+<!-- template-description -->
 iOS app template with a modular SwiftUI architecture, managed with Tuist.
 
 `AGENTS.md` is the fuller guide (build, feature pattern, style, task workflow, git hygiene); this file

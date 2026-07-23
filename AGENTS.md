@@ -1,11 +1,35 @@
 # Template
 
+<!-- template-description -->
 iOS app template with a modular SwiftUI architecture, managed with Tuist. Clone it, run `./setup.sh
 <ProjectName>`, and you have a signed-and-generatable modular app skeleton to build a real product on.
 
+<!-- template-only:start -->
+## Writing Docs In This Repo
+
+Everything here is inherited verbatim by every project generated from it, so prose has to survive
+`setup.sh`. Two rules:
+
+- **Never write "the template" in a sentence that should survive.** `rename_project.sh` leaves the
+  English word alone (it only rewrites dotted/slashed identifiers like `com.acme.template`), so such a
+  sentence reaches the new project claiming the project is a template. Write rename-neutral prose
+  instead — "the project follows MVVM", not "the template follows MVVM". Referring to the *feature*
+  template under `scripts/templates/` is fine: it still exists after bootstrap.
+- **Wrap bootstrap-only passages in markers.** `scripts/finalize_docs.sh` strips them once the rename
+  is done, so nothing describing `setup.sh` or the clone step is left behind. Two HTML comments, both
+  invisible in rendered Markdown — see the raw source of this very section for the exact spelling:
+  - `template-only:start` … `template-only:end` — the block and its markers are deleted, along with
+    any blank lines trailing it. Use it for whole sections, like README's "Quick start".
+  - `template-description` — the marker and the paragraph below it become a one-line TODO naming the
+    new project. Each of README / AGENTS / CLAUDE carries one.
+
+`setup.sh` prints every surviving mention of "template" at the end of a bootstrap, so a missed one
+shows up while there is still someone watching.
+<!-- template-only:end -->
+
 ## Important Files
 
-- `README.md` — high-level overview, quick start, and project structure.
+- `README.md` — high-level overview and project structure.
 - `tasks/README.md` and numbered `tasks/*.md` — the roadmap and scope source of truth.
 - `Project.swift` and `Tuist/ProjectDescriptionHelpers/Targets/**` — define the generated targets.
 - `Tuist/ProjectDescriptionHelpers/Environment/**` — the build-environment system (see Build below).

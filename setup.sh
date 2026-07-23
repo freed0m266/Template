@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # One-shot project bootstrap for the Template repository.
-# Renames Template → <ProjectName>, asks for the Apple Developer Team ID (optional), resolves
-# and generates the Xcode project via Tuist, then removes the bootstrap artefacts
-# (rename script + template git history + this script).
+# Renames Template → <ProjectName>, strips the template-only doc sections, asks for the Apple
+# Developer Team ID (optional), resolves and generates the Xcode project via Tuist, then removes
+# the bootstrap artefacts (rename + doc-finalize scripts, template git history, this script).
 #
 # Run exactly ONCE, immediately after cloning the template.
 
@@ -17,9 +17,11 @@ Usage:
 Description:
   One-shot bootstrap. Run exactly once right after cloning the template:
     1. Renames Template → <ProjectName> across files, directories, and project root
-    2. Asks for your Apple Developer Team ID and wires it into code signing (Enter to skip)
-    3. Installs Tuist dependencies (`tuist install`) and generates the Xcode project (`tuist generate`)
-    4. Removes template git history and bootstrap scripts (rename_project.sh + this script)
+    2. Strips the template-only sections out of the Markdown docs
+    3. Asks for your Apple Developer Team ID and wires it into code signing (Enter to skip)
+    4. Installs Tuist dependencies (`tuist install`) and generates the Xcode project (`tuist generate`)
+    5. Removes template git history and bootstrap scripts (rename_project.sh, finalize_docs.sh,
+       and this script)
 
   Arguments:
     <ProjectName>   Must start with a letter; letters and digits only. E.g. "Keymoji".
@@ -56,15 +58,18 @@ if ! command -v tuist >/dev/null 2>&1; then
 	exit 1
 fi
 
-if [[ ! -f scripts/rename_project.sh ]]; then
-	echo "Error: scripts/rename_project.sh not found — has setup already run?" >&2
-	exit 1
-fi
+for script in rename_project.sh finalize_docs.sh; do
+	if [[ ! -f "scripts/$script" ]]; then
+		echo "Error: scripts/$script not found — has setup already run?" >&2
+		exit 1
+	fi
+done
 
-# rename_project.sh derives the project root from its own location, so we move it from
-# scripts/ to the project root for the rename pass. (Leaving it in scripts/ would only
-# rename files inside that subdirectory.)
+# Both scripts derive the project root from their own location, so we move them from
+# scripts/ to the project root for their passes. (Leaving them in scripts/ would only
+# process files inside that subdirectory.)
 mv scripts/rename_project.sh ./rename_project.sh
+mv scripts/finalize_docs.sh ./finalize_docs.sh
 
 echo "==> Renaming Template -> $NEW_NAME..."
 ./rename_project.sh "$NEW_NAME"
@@ -73,6 +78,13 @@ echo "==> Renaming Template -> $NEW_NAME..."
 # the file descriptor still resolves, but explicit `cd` to the new path keeps relative
 # commands sane for the rest of the script.
 cd "$NEW_PROJECT_DIR"
+
+# The rename deliberately leaves the English word "template" alone, so the docs still carry
+# the sections that only made sense before this script ran. Strip them now that the names
+# are final.
+echo
+echo "==> Finalizing documentation..."
+./finalize_docs.sh "$NEW_NAME"
 
 # Optionally replace the empty `TeamID.placeholder` with a real, named Apple Developer team so
 # the generated project has DEVELOPMENT_TEAM set from day one. Skippable — the template builds
@@ -135,11 +147,27 @@ tuist generate
 
 echo
 echo "==> Cleaning up bootstrap files..."
-rm -f ./rename_project.sh
+rm -f ./rename_project.sh ./finalize_docs.sh
 rm -rf .git
 
 echo "==> Removing setup.sh itself..."
 rm -- "$NEW_PROJECT_DIR/setup.sh"
+
+# The rename never rewrites the English word "template", and the doc markers only cover what
+# was known to be bootstrap-only. Anything left is either a genuine reference (the feature
+# template under scripts/templates/) or prose that nobody marked — surface it once, here,
+# while there is still a human watching.
+echo
+echo "==> Remaining mentions of \"template\"..."
+LEFTOVERS="$(grep -rnE '(^|[^A-Za-z0-9_-])[Tt]emplate([^A-Za-z0-9_-]|$)' \
+	--include='*.md' --include='*.swift' . 2>/dev/null || true)"
+if [[ -z "$LEFTOVERS" ]]; then
+	echo "    none."
+else
+	printf '%s\n' "$LEFTOVERS" | sed 's/^/    /'
+	echo
+	echo "    Check each one still reads correctly for $NEW_NAME."
+fi
 
 cat <<EOF
 
