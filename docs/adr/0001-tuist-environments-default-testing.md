@@ -14,7 +14,7 @@ asset, and the Swift compilation conditions (`TEST` / `PROD`) — is derived fro
 takes a `.test` suffix in testing. Daily `tuist generate && Run` therefore installs `Template TEST`
 (`…​.test` bundle ID, recolored `AppIcon-test`) *alongside* a production build without overwriting it.
 
-The template ships the **slim** form of `AppSetup` (no App Group / keychain group — the app has no
+This project ships the **slim** form of `AppSetup` (no App Group / keychain group — the app has no
 extension). When a project adds a data-sharing extension, extend `AppSetup` with the corresponding
 `.test`-suffixed identifiers and wire the entitlements there.
 
@@ -48,9 +48,9 @@ back to `.testing`, so a typo degrades safely rather than silently producing a p
 
 - Signing (`DEVELOPMENT_TEAM`, `CODE_SIGN_STYLE`, …) and the Swift compilation conditions move out of
   `Project.swift`'s `base` settings into `AppSetup.projectConfigurations`.
-- The template's `TeamID.placeholder` is empty — a fresh project has `DEVELOPMENT_TEAM = ""` and
-  configures automatic signing when you fill it in.
-- The `TEST` / `PROD` compilation conditions are injected project-wide but have **no runtime consumer**
-  in the bare template — the environment axis is proven by the differing display name and icon. Add a
+- `TeamID.placeholder` is empty — until a real team is filled in, `DEVELOPMENT_TEAM = ""` and the
+  project configures automatic signing once you set it.
+- The `TEST` / `PROD` compilation conditions are injected project-wide but start with **no runtime
+  consumer** — the environment axis is proven by the differing display name and icon. Add a
   runtime accessor (or inline `#if TEST`) the first time code genuinely needs to branch.
 - Daily development installs a second app (`Template TEST`) on the device next to any production build.

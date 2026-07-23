@@ -6,7 +6,7 @@ import struct ProjectDescription.SettingsDictionary
 /// display name, app icon asset, signing, and the Swift compilation conditions — so `Project.swift`
 /// and the target manifests stay environment-agnostic.
 ///
-/// This is the **slim** template variant: it deliberately carries no App Group / keychain access
+/// This is the **slim** variant: it deliberately carries no App Group / keychain access
 /// group / extension bundle ID (the app has no extension yet). When a project adds an app extension
 /// that shares data, re-add `appGroupIdentifier` / `keychainAccessGroup` computed properties here and
 /// wire the entitlements in the relevant target manifests.

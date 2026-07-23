@@ -13,8 +13,9 @@ Description:
 
   Replacements are case-sensitive:
     Template -> <ProjectName>            (substring; also inside PascalCase, e.g. TemplateCore)
-    template -> <projectname-lowercase>  (whole token only — skips grid-template-columns etc.)
-    TEMPLATE -> <PROJECTNAME-UPPERCASE>  (whole token only)
+    template -> <projectname-lowercase>  (only as a dotted/slashed identifier component,
+                                          e.g. com.acme.template — never the English word)
+    TEMPLATE -> <PROJECTNAME-UPPERCASE>  (same rule)
 
   Ignored directories (any depth):
     .git, .build, .swiftpm, .tuist, Derived, Products, Frameworks
@@ -58,17 +59,28 @@ export NEW_NAME NEW_NAME_LOWER NEW_NAME_UPPER
 # and must be replaced even inside a compound -> plain substring. Capital-T
 # `Template` does not collide with common English or CSS words, so that is safe.
 #
-# The lowercase / UPPERCASE variants ARE common words ("template",
-# `grid-template-columns`, `feature_template_dir`), so they are replaced only as
-# a standalone identifier token — not when glued to another identifier character
-# ([A-Za-z0-9_-]). Dot/slash/quote-delimited tokens such as the
-# `com.acme.template` bundle ID still match; CSS keywords and snake_case
-# identifiers do not. Replacement values arrive via %ENV so they are never
-# interpreted as regex.
+# The lowercase / UPPERCASE variants ARE ordinary English words, and the prose in
+# this repo uses them as such ("iOS app template", "the feature template"). A
+# standalone-token rule cannot tell that prose apart from an identifier, and
+# rewriting it produces nonsense ("iOS app keymoji with a modular architecture").
+# So they are replaced only where the token is a component of a dotted or slashed
+# identifier: `com.acme.template`, `template/Template`, `template.yml`. A trailing
+# `.` or `/` counts only when an identifier character follows it, so a sentence
+# ending in "template." is left alone. CSS keywords and snake_case identifiers
+# (`grid-template-columns`, `feature_template_dir`) stay excluded as before.
+#
+# Prose therefore survives verbatim — which means prose has to be written to stay
+# true after the rename. Keep it rename-neutral ("the project follows MVVM"), or
+# wrap the bootstrap-only parts in a `template-only` block for finalize_docs.sh to
+# strip. Both marker names are hyphenated, so no rule below can touch them.
+#
+# Replacement values arrive via %ENV so they are never interpreted as regex.
 PERL_RENAME_PROG='
     s/Template/$ENV{NEW_NAME}/g;
-    s/(?<![A-Za-z0-9_-])template(?![A-Za-z0-9_-])/$ENV{NEW_NAME_LOWER}/g;
-    s/(?<![A-Za-z0-9_-])TEMPLATE(?![A-Za-z0-9_-])/$ENV{NEW_NAME_UPPER}/g;
+    s{(?<=[./])template(?![A-Za-z0-9_-])}{$ENV{NEW_NAME_LOWER}}g;
+    s{(?<![A-Za-z0-9_-])template(?=[./][A-Za-z0-9_-])}{$ENV{NEW_NAME_LOWER}}g;
+    s{(?<=[./])TEMPLATE(?![A-Za-z0-9_-])}{$ENV{NEW_NAME_UPPER}}g;
+    s{(?<![A-Za-z0-9_-])TEMPLATE(?=[./][A-Za-z0-9_-])}{$ENV{NEW_NAME_UPPER}}g;
 '
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
