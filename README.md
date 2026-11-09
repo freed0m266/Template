@@ -65,54 +65,39 @@ curl -Ls https://install.tuist.io | bash
 mint bootstrap
 ```
 
-## Project Structure
+## Modules
 
-```
-Template/
-├── Template/                       # Main app target (entry point + ContentView)
-│   ├── Sources/
-│   │   ├── App/                    # @main + AppDelegate (logger setup)
-│   │   └── Views/                  # ContentView (top-level screen)
-│   └── Resources/                  # Asset catalog
-├── TemplateCore/                   # Shared framework (DI, models, services)
-│   └── Sources/
-│       ├── Dependencies/           # AppDependency container
-│       ├── Extensions/             # Foundation extensions
-│       ├── Services/               # NetworkService and friends
-│       └── Shared/                 # BaseViewModel, Logger
-├── TemplateUI/                     # Design system (View+Extensions, Icon)
-├── TemplateResources/              # Localization (L10n alias)
-├── TemplateTesting/                # AssertSnapshot helper
-├── Features/                       # Independent feature frameworks
-├── tasks/                          # Implementation roadmap (numbered task specs) + dashboard
-├── docs/adr/                       # Architecture Decision Records
-├── scripts/                        # Helper scripts
-│   ├── new_feature.sh              # Scaffold a new Features/<Name>/ from the feature template
-│   ├── generate_dashboard.py       # Render a Kanban board of the task files
-│   ├── clean_worktrees.sh          # Remove stale Claude Code worktrees
-│   └── delete_snapshot_references.sh  # Delete snapshot reference PNGs (force re-record)
-└── Tuist/                          # Build system configuration
-    └── ProjectDescriptionHelpers/
-        ├── Environment/            # Testing/Production env system (AppSetup, Environment)
-        └── Targets/                # Per-target factories
-```
+| Module | What it is |
+| --- | --- |
+| `Template/` | Main app target — entry point, `AppDelegate`, `ContentView` |
+| `TemplateCore/` | Shared framework — DI container, `BaseViewModel`, `Logger`, Foundation extensions, `NetworkService` |
+| `TemplateUI/` | Design system — reusable components and view extensions |
+| `TemplateResources/` | Localization and the generated `L10n` alias |
+| `TemplateTesting/` | Snapshot helpers (`AssertSnapshot`) |
+| `Features/` | Independent feature frameworks, one per screen |
+| `tasks/` | Implementation roadmap — numbered task specs (+ a local, git-ignored dashboard) |
+| `docs/adr/` | Architecture Decision Records |
+| `scripts/` | Helper scripts (see below) |
+| `Tuist/` | Build system configuration — environments and per-target factories |
+
+Directory contents inside a module change often; `ls` is the source of truth, not this table.
+
+Scripts: `new_feature.sh` (scaffold a `Features/<Name>/` from the feature template),
+`generate_dashboard.py` (Kanban board of the task files), `clean_worktrees.sh` (remove stale Claude Code
+worktrees), `delete_snapshot_references.sh` (delete snapshot reference PNGs to force a re-record).
 
 ## Architecture
 
-The project follows **MVVM** with **UseCases** and a **Repository** layer:
+MVVM with UseCases and a Repository layer, protocol-first throughout:
 
 ```
 View → ViewModel → UseCase → Repository → Service (API)
 ```
 
-- Every ViewModel, UseCase, Repository, and Service is backed by a protocol
-- Dependencies are injected via a global `AppDependency` container
-- Each feature defines its own `*Dependencies` struct + `AppDependency` extension
-- Views are generic over their ViewModel protocols
+The conventions — layer boundaries, DI wiring, feature pattern, naming, style, snapshot setup — live in
+[CLAUDE.md](CLAUDE.md), which is also the guide coding agents read (`AGENTS.md` symlinks to it).
 
 ## Adding a Feature
-
-Use the feature generator script:
 
 ```bash
 ./scripts/new_feature.sh FeatureName
@@ -121,21 +106,27 @@ tuist generate
 
 ## Tasks and the `/task` command
 
-`tasks/` holds numbered task specs (see [`tasks/README.md`](tasks/README.md) for the convention).
+`tasks/` holds numbered task specs — see [`tasks/README.md`](tasks/README.md) for the file convention.
 
-`.claude/commands/task.md` defines a Claude slash command for working through a numbered task, mirrored
-for Codex in `.codex/skills/task/SKILL.md`. The closing review is **cross-model**: driven from Claude it
-runs Codex (`codex review --uncommitted`); driven from Codex it runs Claude (`claude -p`) — the reviewer
-is always the other model.
+`/task <number>` is a **user-level** command, not checked into this repo — it lives in
+`~/.claude/commands/task.md` for Claude and `~/.codex/skills/task/` for Codex, so a fresh clone does not
+get it. It picks up the task, branches off `main`, implements it, runs the closing review on the staged
+diff, and marks the task Done. It never commits — staging is intentional, you write the commit message.
+`--skip-review` skips the review step, for purely mechanical scaffolding.
 
-- **`/task <number>`** — pick up the task, branch off `main`, implement it, run the closing review on the staged diff, then mark it Done.
-- **`/task <number> --skip-review`** — same as above but skips the review step. Use for purely mechanical scaffolding tasks where review wouldn't catch anything substantive.
+The closing review is **cross-model**: driven from Claude it runs Codex (`codex review --uncommitted`);
+driven from Codex it runs Claude (`claude -p`) — the reviewer is always the other model.
 
-Run `python3 scripts/generate_dashboard.py` for a Kanban board of the task files (`--serve` for a live
-board with drag-and-drop status changes written back into the `.md` files).
+Run `python3 scripts/generate_dashboard.py` for a Kanban board of the task files. The rendered
+`tasks/dashboard.html` is local and git-ignored, so regenerate it whenever you want (`--serve` for a
+live board with drag-and-drop status changes written back into the `.md` files).
 
 ## Dependencies
 
-- [SwiftyBeaver](https://github.com/SwiftyBeaver/SwiftyBeaver) — Logging
-- [BaseKitX](https://github.com/freed0m266/BaseKitX) — Foundation utilities
-- [swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing) — Snapshot tests
+Declared in [`Tuist/Package.swift`](Tuist/Package.swift); each is wired to exactly one target in
+`Tuist/ProjectDescriptionHelpers/Targets/`.
+
+| Package | Used by | For |
+| --- | --- | --- |
+| [SwiftyBeaver](https://github.com/SwiftyBeaver/SwiftyBeaver) | `TemplateCore` | Logging |
+| [swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing) | `TemplateTesting` | Snapshot tests |

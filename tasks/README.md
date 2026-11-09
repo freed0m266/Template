@@ -1,8 +1,8 @@
 # Roadmap
 
-> Status snapshot: [dashboard.html](dashboard.html) — a dark-mode Kanban board of these task files.
-> Regenerate the static snapshot with `python3 scripts/generate_dashboard.py`. A live board with
-> drag-and-drop status changes (written back into the `.md` files) runs via
+> Status snapshot: `python3 scripts/generate_dashboard.py` renders a dark-mode Kanban board of
+> these task files into a local, git-ignored `dashboard.html` — regenerate it whenever you want.
+> A live board with drag-and-drop status changes (written back into the `.md` files) runs via
 > `python3 scripts/generate_dashboard.py --serve`; clicking a card opens the full task in a modal.
 
 Numbered task specs for the project. Each task is a self-contained markdown document with a
@@ -10,8 +10,8 @@ fixed structure (goal, context, scope, out-of-scope, done criteria, risks, refer
 
 ## How to use
 
-Pick up a task with the `/task <number>` Claude command (defined in
-[`.claude/commands/task.md`](../.claude/commands/task.md)). It will:
+Pick up a task with the `/task <number>` Claude command. It is a **user-level** command living in
+`~/.claude/commands/task.md` — not checked into this repo, so a fresh clone does not get it. It will:
 
 1. Read the task file and any referenced files for context.
 2. Branch off `main` (naming `feature/<NN>-<short-slug>`).
