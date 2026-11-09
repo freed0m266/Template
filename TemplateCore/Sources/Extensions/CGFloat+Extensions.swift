@@ -41,7 +41,7 @@ extension CGFloat {
 			formatter = CGFloat.decimalFormatter
 		}
 
-		return formatter.string(from: self) ?? String(describing: self)
+		return formatter.string(from: NSNumber(value: Double(self))) ?? String(describing: self)
 	}
 
 	private static let decimalFormatter = {
