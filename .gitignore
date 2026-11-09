@@ -38,3 +38,4 @@ Pods/
 *.lock
 profile
 *.orig
+tasks/dashboard.html
