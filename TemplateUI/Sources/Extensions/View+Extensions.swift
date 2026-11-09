@@ -13,6 +13,12 @@ public extension View {
 	func maxWidthLeading() -> some View {
 		frame(maxWidth: .infinity, alignment: .leading)
 	}
+
+	/// iOS 27 turned the automatic top scroll edge effect into `.hard`, a flat opaque bar.
+	/// Apply it to every `NavigationStack`, a presented one included.
+	func softTopScrollEdge() -> some View {
+		scrollEdgeEffectStyle(.soft, for: .top)
+	}
 }
 
 public extension View {
