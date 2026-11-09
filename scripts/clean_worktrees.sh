@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #
-# Remove leftover git worktrees registered under `.claude/worktrees/` (the
-# Claude Code session and agent worktrees). Run by hand when stale worktrees
-# pile up after their work has been merged/pushed.
+# Remove leftover git worktrees registered under the project's
+# `.claude/worktrees/` or the user's `~/.codex/worktrees/` (Claude Code and
+# Codex session/agent worktrees). Run by hand when stale worktrees pile up
+# after their work has been merged/pushed.
 #
 #   scripts/clean_worktrees.sh             # remove all *clean* leftover worktrees
 #   scripts/clean_worktrees.sh --dry-run   # list what would be removed
@@ -25,8 +26,9 @@ usage() {
     cat <<USAGE
 Usage: $0 [--dry-run] [--force]
 
-Removes git worktrees registered under .claude/worktrees/ (Claude Code session
-and agent worktrees). The main working tree is never removed.
+Removes git worktrees registered under .claude/worktrees/ or ~/.codex/worktrees/
+(Claude Code and Codex session/agent worktrees). The main working tree is
+never removed.
 
 Options:
   -n, --dry-run   List worktrees that would be removed, without removing them.
@@ -45,7 +47,8 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Collect linked-worktree paths under .claude/worktrees/ from porcelain output.
+# Collect linked-worktree paths under `.claude/worktrees/` or
+# `~/.codex/worktrees/` from porcelain output.
 # (`substr($0, 10)` strips the leading "worktree " so paths with spaces survive.)
 worktrees=()
 while IFS= read -r path; do
@@ -53,11 +56,11 @@ while IFS= read -r path; do
 done < <(
     git -C "$REPO_ROOT" worktree list --porcelain \
         | awk '/^worktree /{print substr($0, 10)}' \
-        | grep "/.claude/worktrees/" || true
+        | grep -E '/\.(claude|codex)/worktrees/' || true
 )
 
 if [[ ${#worktrees[@]} -eq 0 ]]; then
-    echo "No worktrees under .claude/worktrees/ — nothing to clean."
+    echo "No worktrees under .claude/worktrees/ or ~/.codex/worktrees/ — nothing to clean."
     exit 0
 fi
 
